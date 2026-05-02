@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, Users } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -11,6 +12,8 @@ import { CourseWithTeacher } from "@/types";
 import { formatCurrency } from "@/lib/utils";
 
 export default function CoursesPage() {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
   const [courses, setCourses] = useState<CourseWithTeacher[]>([]);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
@@ -41,10 +44,12 @@ export default function CoursesPage() {
   return (
     <div className="space-y-5">
       <div className="flex justify-end">
-        <Button onClick={() => setShowForm(true)}>
-          <Plus size={15} />
-          Add Course
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => setShowForm(true)}>
+            <Plus size={15} />
+            Add Course
+          </Button>
+        )}
       </div>
 
       {loading ? (
@@ -79,24 +84,26 @@ export default function CoursesPage() {
                 </p>
               </div>
 
-              <div className="flex gap-2 pt-1 border-t border-border">
-                <Button
-                  variant="secondary"
-                  size="sm"
-                  className="flex-1"
-                  onClick={() => { setEditTarget(course); setShowForm(true); }}
-                >
-                  <Pencil size={13} />
-                  Edit
-                </Button>
-                <Button
-                  variant="danger"
-                  size="sm"
-                  onClick={() => handleDelete(course.id)}
-                >
-                  <Trash2 size={13} />
-                </Button>
-              </div>
+              {isAdmin && (
+                <div className="flex gap-2 pt-1 border-t border-border">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    className="flex-1"
+                    onClick={() => { setEditTarget(course); setShowForm(true); }}
+                  >
+                    <Pencil size={13} />
+                    Edit
+                  </Button>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    onClick={() => handleDelete(course.id)}
+                  >
+                    <Trash2 size={13} />
+                  </Button>
+                </div>
+              )}
             </Card>
           ))}
 

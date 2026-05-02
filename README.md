@@ -52,7 +52,7 @@ A full-stack web app for managing students, courses, enrollments, payments, and 
 ### Installation
 
 ```bash
-git clone https://github.com/mrlengineer/Panel-de-gestion-escolar.git
+git clone https://github.com/your-username/Panel-de-gestion-escolar.git
 cd Panel-de-gestion-escolar
 npm install
 ```
@@ -180,5 +180,4 @@ prisma/
 
 ## Author
 
-Built by **MrL** — [GitHub](https://github.com/mrlengineer) · [Portfolio](https://mrlengineer.github.io/MrLDev/)
-Ft by **x1yzl** — [GitHub](https://github.com/x1yzl) · [Portfolio](https://x1yzl.github.io/)
+Built by **[your name]** — [GitHub](https://github.com/your-username) · [Portfolio](https://your-portfolio.com)
