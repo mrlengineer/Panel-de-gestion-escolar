@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { useSession } from "next-auth/react";
 import {
   LayoutDashboard,
   Users,
@@ -13,19 +14,33 @@ import {
   GraduationCap,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { Role } from "@prisma/client";
 
-const navItems = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/dashboard/students", label: "Students", icon: Users },
-  { href: "/dashboard/courses", label: "Courses", icon: BookOpen },
+type NavItem = {
+  href: string;
+  label: string;
+  icon: React.ElementType;
+  roles?: Role[];
+};
+
+const navItems: NavItem[] = [
+  { href: "/dashboard",             label: "Dashboard",   icon: LayoutDashboard },
+  { href: "/dashboard/students",    label: "Students",    icon: Users },
+  { href: "/dashboard/courses",     label: "Courses",     icon: BookOpen },
   { href: "/dashboard/enrollments", label: "Enrollments", icon: ClipboardList },
-  { href: "/dashboard/payments", label: "Payments", icon: CreditCard },
-  { href: "/dashboard/attendance", label: "Attendance", icon: CalendarCheck },
-  { href: "/dashboard/reports", label: "Reports", icon: BarChart3 },
+  { href: "/dashboard/payments",    label: "Payments",    icon: CreditCard,    roles: ["ADMIN", "FINANCE"] },
+  { href: "/dashboard/attendance",  label: "Attendance",  icon: CalendarCheck, roles: ["ADMIN", "TEACHER"] },
+  { href: "/dashboard/reports",     label: "Reports",     icon: BarChart3,     roles: ["ADMIN", "FINANCE"] },
 ];
 
 export default function Sidebar() {
   const pathname = usePathname();
+  const { data: session } = useSession();
+  const role = session?.user?.role as Role | undefined;
+
+  const visible = navItems.filter(
+    (item) => !item.roles || !role || item.roles.includes(role)
+  );
 
   return (
     <aside className="w-64 min-h-screen bg-surface border-r border-border flex flex-col">
@@ -42,7 +57,7 @@ export default function Sidebar() {
       </div>
 
       <nav className="flex-1 p-4 space-y-1">
-        {navItems.map(({ href, label, icon: Icon }) => (
+        {visible.map(({ href, label, icon: Icon }) => (
           <Link
             key={href}
             href={href}

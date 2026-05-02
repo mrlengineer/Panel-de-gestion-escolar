@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { Plus, Trash2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -17,6 +18,8 @@ interface Student { id: string; firstName: string; lastName: string; }
 interface Course { id: string; name: string; }
 
 export default function EnrollmentsPage() {
+  const { data: session } = useSession();
+  const canWrite = ["ADMIN", "FINANCE"].includes(session?.user?.role ?? "");
   const [enrollments, setEnrollments] = useState<EnrollmentWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
@@ -107,10 +110,12 @@ export default function EnrollmentsPage() {
             </button>
           ))}
         </div>
-        <Button onClick={() => setShowForm(true)}>
-          <Plus size={15} />
-          Enroll Student
-        </Button>
+        {canWrite && (
+          <Button onClick={() => setShowForm(true)}>
+            <Plus size={15} />
+            Enroll Student
+          </Button>
+        )}
       </div>
 
       <Card>
@@ -129,21 +134,29 @@ export default function EnrollmentsPage() {
                 </td>
                 <td className="py-3 px-4 text-text-muted">{e.course.name}</td>
                 <td className="py-3 px-4">
-                  <select
-                    value={e.status}
-                    onChange={(ev) => handleStatusChange(e.id, ev.target.value)}
-                    className="bg-transparent text-xs border border-border rounded px-2 py-1 focus:outline-none"
-                  >
-                    <option value="PENDING">Pending</option>
-                    <option value="PAID">Paid</option>
-                    <option value="CANCELLED">Cancelled</option>
-                  </select>
+                  {canWrite ? (
+                    <select
+                      value={e.status}
+                      onChange={(ev) => handleStatusChange(e.id, ev.target.value)}
+                      className="bg-transparent text-xs border border-border rounded px-2 py-1 focus:outline-none"
+                    >
+                      <option value="PENDING">Pending</option>
+                      <option value="PAID">Paid</option>
+                      <option value="CANCELLED">Cancelled</option>
+                    </select>
+                  ) : (
+                    <Badge variant={e.status === "PAID" ? "success" : e.status === "PENDING" ? "warning" : "danger"}>
+                      {e.status.toLowerCase()}
+                    </Badge>
+                  )}
                 </td>
                 <td className="py-3 px-4 text-text-muted text-xs">{formatDate(e.enrolledAt)}</td>
                 <td className="py-3 px-4">
-                  <Button variant="ghost" size="sm" onClick={() => handleDelete(e.id)}>
-                    <Trash2 size={13} className="text-danger" />
-                  </Button>
+                  {canWrite && (
+                    <Button variant="ghost" size="sm" onClick={() => handleDelete(e.id)}>
+                      <Trash2 size={13} className="text-danger" />
+                    </Button>
+                  )}
                 </td>
               </tr>
             ))}

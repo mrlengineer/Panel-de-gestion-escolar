@@ -1,10 +1,14 @@
 import { prisma } from "@/lib/prisma";
 import { NextResponse } from "next/server";
+import { requireAuth, ADMIN_FINANCE } from "@/lib/rbac";
 
 export const dynamic = "force-dynamic";
 import { startOfMonth, subMonths, format } from "date-fns";
 
 export async function GET() {
+  const a = await requireAuth(...ADMIN_FINANCE);
+  if (!a.ok) return a.response;
+
   const now = new Date();
 
   // last 6 months revenue

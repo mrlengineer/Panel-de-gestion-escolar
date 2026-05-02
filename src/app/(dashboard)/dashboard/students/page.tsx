@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Plus, Search, Eye, Pencil, Trash2 } from "lucide-react";
+import { useSession } from "next-auth/react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -13,6 +14,8 @@ import { Student } from "@/types";
 import { formatDate } from "@/lib/utils";
 
 export default function StudentsPage() {
+  const { data: session } = useSession();
+  const isAdmin = session?.user?.role === "ADMIN";
   const [students, setStudents] = useState<Student[]>([]);
   const [search, setSearch] = useState("");
   const [loading, setLoading] = useState(true);
@@ -57,10 +60,12 @@ export default function StudentsPage() {
             className="bg-surface border border-border rounded-lg pl-9 pr-4 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/50 w-64"
           />
         </div>
-        <Button onClick={() => setShowForm(true)}>
-          <Plus size={15} />
-          Add Student
-        </Button>
+        {isAdmin && (
+          <Button onClick={() => setShowForm(true)}>
+            <Plus size={15} />
+            Add Student
+          </Button>
+        )}
       </div>
 
       <Card>
@@ -94,12 +99,16 @@ export default function StudentsPage() {
                         <Eye size={13} />
                       </Button>
                     </Link>
-                    <Button variant="ghost" size="sm" onClick={() => { setEditTarget(s); setShowForm(true); }}>
-                      <Pencil size={13} />
-                    </Button>
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(s.id)}>
-                      <Trash2 size={13} className="text-danger" />
-                    </Button>
+                    {isAdmin && (
+                      <Button variant="ghost" size="sm" onClick={() => { setEditTarget(s); setShowForm(true); }}>
+                        <Pencil size={13} />
+                      </Button>
+                    )}
+                    {isAdmin && (
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(s.id)}>
+                        <Trash2 size={13} className="text-danger" />
+                      </Button>
+                    )}
                   </div>
                 </td>
               </tr>
