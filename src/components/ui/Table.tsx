@@ -7,14 +7,14 @@ interface TableProps {
 
 export default function Table({ headers, children, emptyMessage = "No data found.", isEmpty }: TableProps) {
   return (
-    <div className="overflow-x-auto">
+    <div className="overflow-x-auto -mx-1">
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b border-border">
             {headers.map((h) => (
               <th
                 key={h}
-                className="text-left text-xs font-medium text-text-muted uppercase tracking-wider py-3 px-4 first:pl-0"
+                className="text-left text-[11px] font-semibold text-text-muted uppercase tracking-widest py-3 px-4 first:pl-1"
               >
                 {h}
               </th>
@@ -26,7 +26,7 @@ export default function Table({ headers, children, emptyMessage = "No data found
             <tr>
               <td
                 colSpan={headers.length}
-                className="text-center text-text-muted py-10"
+                className="text-center text-text-muted py-10 text-sm"
               >
                 {emptyMessage}
               </td>

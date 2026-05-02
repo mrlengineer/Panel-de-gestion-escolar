@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Eye, Pencil, Trash2 } from "lucide-react";
+import { Plus, Search, Eye, Pencil, Trash2, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
@@ -49,15 +49,15 @@ export default function StudentsPage() {
 
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <div className="relative">
-          <Search size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
           <input
             type="text"
-            placeholder="Search students..."
+            placeholder="Search by name or email…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="bg-surface border border-border rounded-lg pl-9 pr-4 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/50 w-64"
+            className="bg-surface-2 border border-border rounded-lg pl-8 pr-4 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/60 w-64 transition-all"
           />
         </div>
         {isAdmin && (
@@ -88,49 +88,78 @@ export default function StudentsPage() {
               </div>
             ))}
           </div>
+        ) : students.length === 0 ? (
+          <div className="py-16 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-border flex items-center justify-center mx-auto mb-4">
+              <Users size={22} className="text-text-muted" />
+            </div>
+            <p className="font-medium text-text-primary">
+              {search ? "No students match your search" : "No students yet"}
+            </p>
+            <p className="text-sm text-text-muted mt-1">
+              {search ? "Try a different name or email." : "Add your first student to get started."}
+            </p>
+          </div>
         ) : (
-          <Table
-            headers={["Name", "Email", "Status", "Joined", "Actions"]}
-            isEmpty={students.length === 0}
-            emptyMessage="No students found."
-          >
-            {students.map((s) => (
-              <tr key={s.id} className="border-b border-border/50 hover:bg-surface-2/50 transition-colors">
-                <td className="py-3 px-4 first:pl-0">
-                  <p className="font-medium text-text-primary">
-                    {s.firstName} {s.lastName}
-                  </p>
-                  {s.phone && <p className="text-xs text-text-muted">{s.phone}</p>}
-                </td>
-                <td className="py-3 px-4 text-text-muted">{s.email}</td>
-                <td className="py-3 px-4">
-                  <Badge variant={s.status === "ACTIVE" ? "success" : "default"}>
-                    {s.status.toLowerCase()}
-                  </Badge>
-                </td>
-                <td className="py-3 px-4 text-text-muted text-xs">{formatDate(s.createdAt)}</td>
-                <td className="py-3 px-4">
-                  <div className="flex items-center gap-2">
-                    <Link href={`/dashboard/students/${s.id}`}>
-                      <Button variant="ghost" size="sm">
-                        <Eye size={13} />
-                      </Button>
-                    </Link>
-                    {isAdmin && (
-                      <Button variant="ghost" size="sm" onClick={() => { setEditTarget(s); setShowForm(true); }}>
-                        <Pencil size={13} />
-                      </Button>
-                    )}
-                    {isAdmin && (
-                      <Button variant="ghost" size="sm" onClick={() => handleDelete(s.id)}>
-                        <Trash2 size={13} className="text-danger" />
-                      </Button>
-                    )}
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </Table>
+          <>
+            <div className="flex items-center justify-between mb-3 text-xs text-text-muted">
+              <span>
+                <span className="font-semibold text-text-primary">{students.length}</span> student{students.length !== 1 ? "s" : ""}
+                {search && " found"}
+              </span>
+            </div>
+            <Table
+              headers={["Name", "Email", "Status", "Joined", "Actions"]}
+              isEmpty={false}
+            >
+              {students.map((s) => (
+                <tr key={s.id} className="border-b border-border/30 hover:bg-surface-2/40 transition-colors">
+                  <td className="py-3 px-4 first:pl-0">
+                    <p className="font-medium text-text-primary">
+                      {s.firstName} {s.lastName}
+                    </p>
+                    {s.phone && <p className="text-xs text-text-muted">{s.phone}</p>}
+                  </td>
+                  <td className="py-3 px-4 text-text-muted text-sm">{s.email}</td>
+                  <td className="py-3 px-4">
+                    <Badge variant={s.status === "ACTIVE" ? "success" : "default"}>
+                      {s.status.toLowerCase()}
+                    </Badge>
+                  </td>
+                  <td className="py-3 px-4 text-text-muted text-xs">{formatDate(s.createdAt)}</td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-1.5">
+                      <Link href={`/dashboard/students/${s.id}`}>
+                        <Button variant="ghost" size="sm" title="View profile">
+                          <Eye size={13} />
+                        </Button>
+                      </Link>
+                      {isAdmin && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Edit"
+                          onClick={() => { setEditTarget(s); setShowForm(true); }}
+                        >
+                          <Pencil size={13} />
+                        </Button>
+                      )}
+                      {isAdmin && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          title="Delete"
+                          onClick={() => handleDelete(s.id)}
+                        >
+                          <Trash2 size={13} className="text-danger" />
+                        </Button>
+                      )}
+                    </div>
+                  </td>
+                </tr>
+              ))}
+            </Table>
+          </>
         )}
       </Card>
 

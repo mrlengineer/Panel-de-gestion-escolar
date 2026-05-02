@@ -1,5 +1,5 @@
 import { prisma } from "@/lib/prisma";
-import { formatCurrency, formatDate } from "@/lib/utils";
+import { formatCurrency } from "@/lib/utils";
 import { startOfMonth, endOfMonth } from "date-fns";
 import StatCard from "@/components/dashboard/StatCard";
 import RecentEnrollments from "@/components/dashboard/RecentEnrollments";
@@ -35,7 +35,7 @@ async function getDashboardData() {
       _sum: { amount: true },
     }),
     prisma.enrollment.findMany({
-      take: 5,
+      take: 6,
       orderBy: { enrolledAt: "desc" },
       include: {
         student: true,
@@ -56,43 +56,70 @@ async function getDashboardData() {
 
 export default async function DashboardPage() {
   const data = await getDashboardData();
+  const now = new Date();
+
+  const dayName = now.toLocaleDateString("en-US", { weekday: "long" });
+  const dateStr = now.toLocaleDateString("en-US", {
+    month: "long",
+    day: "numeric",
+    year: "numeric",
+  });
 
   return (
-    <div className="space-y-6">
-      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4">
+    <div className="space-y-6 page-enter">
+      {/* Greeting */}
+      <div className="flex items-end justify-between">
+        <div>
+          <p className="text-xs font-medium text-text-muted mb-1">
+            {dayName}, {dateStr}
+          </p>
+          <h2 className="text-xl font-bold text-text-primary">
+            Good{now.getHours() < 12 ? " morning" : now.getHours() < 18 ? " afternoon" : " evening"} 👋
+          </h2>
+          <p className="text-sm text-text-muted mt-1">
+            Here&apos;s what&apos;s happening at your school today.
+          </p>
+        </div>
+        <div className="hidden sm:flex items-center gap-2 px-3 py-1.5 rounded-full border border-success/20 bg-success/5">
+          <span className="w-1.5 h-1.5 rounded-full bg-success animate-pulse" />
+          <span className="text-xs font-medium text-success">System online</span>
+        </div>
+      </div>
+
+      {/* Stats grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-4 stagger">
         <StatCard
           title="Total Students"
           value={data.totalStudents.toString()}
           sub={`${data.activeStudents} active`}
-          icon={<Users size={20} />}
+          icon={<Users size={18} />}
           color="accent"
         />
         <StatCard
           title="Active Courses"
           value={data.activeCourses.toString()}
           sub="currently running"
-          icon={<BookOpen size={20} />}
+          icon={<BookOpen size={18} />}
           color="success"
         />
         <StatCard
           title="Pending Payments"
           value={formatCurrency(data.pendingPayments)}
           sub="needs collection"
-          icon={<CreditCard size={20} />}
+          icon={<CreditCard size={18} />}
           color="warning"
         />
         <StatCard
           title="Monthly Revenue"
           value={formatCurrency(data.monthlyRevenue)}
-          sub={`${new Date().toLocaleString("default", { month: "long" })}`}
-          icon={<TrendingUp size={20} />}
+          sub={now.toLocaleString("default", { month: "long" })}
+          icon={<TrendingUp size={18} />}
           color="success"
         />
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-        <RecentEnrollments enrollments={data.recentEnrollments} />
-      </div>
+      {/* Recent enrollments */}
+      <RecentEnrollments enrollments={data.recentEnrollments} />
     </div>
   );
 }

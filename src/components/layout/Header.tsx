@@ -1,46 +1,43 @@
 "use client";
 
-import { signOut, useSession } from "next-auth/react";
-import { LogOut, Bell } from "lucide-react";
-import { getInitials } from "@/lib/utils";
+import { usePathname } from "next/navigation";
+import { ChevronRight } from "lucide-react";
 
 interface HeaderProps {
   title: string;
+  subtitle?: string;
 }
 
-export default function Header({ title }: HeaderProps) {
-  const { data: session } = useSession();
+export default function Header({ title, subtitle }: HeaderProps) {
+  const pathname = usePathname();
+  const segments = pathname.split("/").filter(Boolean);
 
   return (
-    <header className="h-16 bg-surface border-b border-border flex items-center justify-between px-6">
-      <h1 className="text-lg font-semibold text-text-primary">{title}</h1>
-
-      <div className="flex items-center gap-4">
-        <button className="text-text-muted hover:text-text-primary transition-colors">
-          <Bell size={18} />
-        </button>
-
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-full bg-accent flex items-center justify-center text-xs font-semibold text-white">
-            {session?.user?.name ? getInitials(session.user.name) : "?"}
+    <header className="bg-surface border-b border-border px-6 py-4 min-h-[64px] flex items-center">
+      <div className="flex-1 min-w-0">
+        {/* Breadcrumb */}
+        {segments.length > 1 && (
+          <div className="flex items-center gap-1 mb-1">
+            {segments.map((seg, i) => (
+              <span key={i} className="flex items-center gap-1">
+                {i > 0 && <ChevronRight size={11} className="text-text-muted" />}
+                <span
+                  className={
+                    i === segments.length - 1
+                      ? "text-[11px] text-text-secondary font-medium capitalize"
+                      : "text-[11px] text-text-muted capitalize"
+                  }
+                >
+                  {seg}
+                </span>
+              </span>
+            ))}
           </div>
-          <div className="hidden sm:block">
-            <p className="text-sm font-medium text-text-primary leading-none">
-              {session?.user?.name}
-            </p>
-            <p className="text-xs text-text-muted capitalize mt-0.5">
-              {session?.user?.role?.toLowerCase()}
-            </p>
-          </div>
-        </div>
-
-        <button
-          onClick={() => signOut({ callbackUrl: "/login" })}
-          className="text-text-muted hover:text-danger transition-colors"
-          title="Sign out"
-        >
-          <LogOut size={17} />
-        </button>
+        )}
+        <h1 className="text-[15px] font-semibold text-text-primary leading-tight">{title}</h1>
+        {subtitle && (
+          <p className="text-xs text-text-muted mt-0.5">{subtitle}</p>
+        )}
       </div>
     </header>
   );

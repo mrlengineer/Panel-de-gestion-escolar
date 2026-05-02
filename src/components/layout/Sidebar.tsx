@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useSession } from "next-auth/react";
+import { useSession, signOut } from "next-auth/react";
 import {
   LayoutDashboard,
   Users,
@@ -12,6 +12,7 @@ import {
   CalendarCheck,
   BarChart3,
   GraduationCap,
+  LogOut,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { Role } from "@prisma/client";
@@ -43,49 +44,65 @@ export default function Sidebar() {
   );
 
   return (
-    <aside className="w-64 min-h-screen bg-surface border-r border-border flex flex-col">
-      <div className="p-6 border-b border-border">
+    <aside className="w-60 min-h-screen bg-surface border-r border-border flex flex-col shrink-0">
+      {/* Logo */}
+      <div className="px-5 py-5 border-b border-border">
         <div className="flex items-center gap-3">
-          <div className="w-8 h-8 bg-accent rounded-lg flex items-center justify-center">
-            <GraduationCap size={18} className="text-white" />
+          <div className="w-8 h-8 rounded-lg bg-gradient-accent flex items-center justify-center shadow-accent-glow shrink-0">
+            <GraduationCap size={16} className="text-white" />
           </div>
           <div>
-            <p className="text-sm font-semibold text-text-primary">SchoolDesk</p>
-            <p className="text-xs text-text-muted">Management</p>
+            <p className="text-[13px] font-semibold text-text-primary leading-none">SchoolDesk</p>
+            <p className="text-[11px] text-text-muted mt-0.5">Management</p>
           </div>
         </div>
       </div>
 
-      <nav className="flex-1 p-4 space-y-1">
-        {visible.map(({ href, label, icon: Icon }) => (
-          <Link
-            key={href}
-            href={href}
-            className={cn(
-              "sidebar-link",
-              pathname === href || pathname.startsWith(href + "/") ? "active" : ""
-            )}
-          >
-            <Icon size={17} />
-            {label}
-          </Link>
-        ))}
+      {/* Nav */}
+      <nav className="flex-1 px-3 py-4 space-y-0.5">
+        <p className="text-[10px] font-semibold text-text-muted uppercase tracking-widest px-3 mb-2">
+          Menu
+        </p>
+        {visible.map(({ href, label, icon: Icon }) => {
+          const isActive = pathname === href || (href !== "/dashboard" && pathname.startsWith(href + "/"));
+          return (
+            <Link
+              key={href}
+              href={href}
+              className={cn("sidebar-link", isActive && "active")}
+            >
+              <Icon size={15} className="shrink-0" />
+              {label}
+            </Link>
+          );
+        })}
       </nav>
 
-      <div className="p-4 border-t border-border space-y-3">
-        {session?.user && (
-          <div className="flex items-center gap-3">
-            <div className="w-8 h-8 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center text-xs font-semibold text-accent flex-shrink-0">
+      {/* User card */}
+      {session?.user && (
+        <div className="px-3 pb-4 border-t border-border pt-4">
+          <div className="flex items-center gap-3 px-3 py-2.5 rounded-lg bg-surface-2 border border-border">
+            <div className="w-7 h-7 rounded-full bg-gradient-accent flex items-center justify-center text-[11px] font-bold text-white shrink-0">
               {getInitials(session.user.name ?? "?")}
             </div>
-            <div className="min-w-0">
-              <p className="text-sm font-medium text-text-primary truncate">{session.user.name}</p>
-              <p className="text-xs text-text-muted capitalize">{session.user.role?.toLowerCase()}</p>
+            <div className="flex-1 min-w-0">
+              <p className="text-[12px] font-medium text-text-primary truncate leading-none">
+                {session.user.name}
+              </p>
+              <p className="text-[11px] text-text-muted capitalize mt-0.5">
+                {session.user.role?.toLowerCase()}
+              </p>
             </div>
+            <button
+              onClick={() => signOut({ callbackUrl: "/login" })}
+              title="Sign out"
+              className="text-text-muted hover:text-danger transition-colors shrink-0"
+            >
+              <LogOut size={13} />
+            </button>
           </div>
-        )}
-        <p className="text-xs text-text-muted text-center">v0.1.0</p>
-      </div>
+        </div>
+      )}
     </aside>
   );
 }

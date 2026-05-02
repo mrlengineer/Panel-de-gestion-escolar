@@ -1,67 +1,167 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap");
-
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,300..700;1,14..32,300..700&display=swap");
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
-
 * {
-  box-sizing: border-box;
+    box-sizing: border-box;
 }
 
 html {
-  scroll-behavior: smooth;
+    scroll-behavior: smooth;
 }
 
 body {
-  background-color: #0f1117;
-  color: #e8eaf0;
-  font-family: "Inter", system-ui, sans-serif;
+    background-color: #07090f;
+    color: #edf0f8;
+    font-family: "Inter", system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+::selection {
+    background: rgba(99, 102, 241, 0.25);
+    color: #edf0f8;
 }
 
 :focus-visible {
-  outline: 2px solid #6366f1;
-  outline-offset: 2px;
-  border-radius: 4px;
+    outline: 2px solid #6366f1;
+    outline-offset: 2px;
+    border-radius: 6px;
 }
 
 ::-webkit-scrollbar {
-  width: 6px;
-  height: 6px;
+    width: 5px;
+    height: 5px;
 }
 
 ::-webkit-scrollbar-track {
-  background: #1a1d27;
+    background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #2e3147;
-  border-radius: 3px;
+    background: #1f2736;
+    border-radius: 99px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #6366f1;
+    background: #6366f1;
 }
 
+
+/* ── Skeleton ─────────────────────────────────────── */
+
 @keyframes shimmer {
-  0% {
-    background-position: -200% 0;
-  }
-  100% {
-    background-position: 200% 0;
-  }
+    0% {
+        background-position: -200% 0;
+    }
+    100% {
+        background-position: 200% 0;
+    }
 }
 
 .skeleton {
-  background: linear-gradient(90deg, #1a1d27 25%, #222536 50%, #1a1d27 75%);
-  background-size: 200% 100%;
-  animation: shimmer 1.5s infinite;
-  border-radius: 4px;
+    background: linear-gradient(90deg, #141920 25%, #1a2030 50%, #141920 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.5s infinite;
+    border-radius: 6px;
 }
 
+
+/* ── Sidebar nav links ────────────────────────────── */
+
 .sidebar-link {
-  @apply flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-text-muted hover:text-text-primary hover:bg-surface-2 transition-all duration-150;
+    @apply relative flex items-center gap-3 px-3 py-2.5 rounded-lg text-[13px] font-medium text-text-muted transition-all duration-150;
+}
+
+.sidebar-link::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 2px;
+    height: 0;
+    border-radius: 99px;
+    background: #6366f1;
+    transition: height 0.2s ease;
+}
+
+.sidebar-link:hover {
+    @apply text-text-primary bg-surface-2;
 }
 
 .sidebar-link.active {
-  @apply text-accent bg-accent/10 border border-accent/20;
+    @apply text-accent-light bg-accent/[0.08];
+}
+
+.sidebar-link.active::before {
+    height: 18px;
+}
+
+
+/* ── Page entrance ────────────────────────────────── */
+
+@keyframes page-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.page-enter {
+    animation: page-in 0.3s ease-out both;
+}
+
+
+/* Staggered grid children */
+
+.stagger>* {
+    animation: page-in 0.35s ease-out both;
+}
+
+.stagger>*:nth-child(1) {
+    animation-delay: 0ms;
+}
+
+.stagger>*:nth-child(2) {
+    animation-delay: 60ms;
+}
+
+.stagger>*:nth-child(3) {
+    animation-delay: 120ms;
+}
+
+.stagger>*:nth-child(4) {
+    animation-delay: 180ms;
+}
+
+.stagger>*:nth-child(5) {
+    animation-delay: 240ms;
+}
+
+.stagger>*:nth-child(6) {
+    animation-delay: 300ms;
+}
+
+
+/* ── Tab pill bar ─────────────────────────────────── */
+
+.tab-bar {
+    @apply flex items-center gap-0.5 bg-surface-2 border border-border rounded-lg p-1;
+}
+
+.tab-item {
+    @apply text-sm px-3 py-1.5 rounded-md font-medium transition-all duration-150 text-text-muted;
+}
+
+.tab-item:hover {
+    @apply text-text-primary;
+}
+
+.tab-item.active {
+    @apply bg-accent text-white shadow-sm;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Plus, Trash2, CheckCircle } from "lucide-react";
+import { Plus, Trash2, CheckCircle, CreditCard } from "lucide-react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
@@ -15,6 +15,19 @@ import { formatCurrency, formatDate } from "@/lib/utils";
 type TabType = "ALL" | "PENDING" | "COMPLETED";
 
 interface Student { id: string; firstName: string; lastName: string; }
+
+const METHOD_STYLES: Record<string, { label: string; cls: string }> = {
+  CASH:   { label: "Cash",   cls: "bg-success/10 text-success border border-success/20" },
+  CARD:   { label: "Card",   cls: "bg-accent/10 text-accent border border-accent/20" },
+  ZELLE:  { label: "Zelle",  cls: "bg-warning/10 text-warning border border-warning/20" },
+  PAYPAL: { label: "PayPal", cls: "bg-info/10 text-accent border border-accent/20" },
+};
+
+const TABS: { value: TabType; label: string }[] = [
+  { value: "ALL", label: "All" },
+  { value: "PENDING", label: "Pending" },
+  { value: "COMPLETED", label: "Completed" },
+];
 
 export default function PaymentsPage() {
   const [payments, setPayments] = useState<PaymentWithStudent[]>([]);
@@ -80,16 +93,9 @@ export default function PaymentsPage() {
       setForm({ studentId: "", amount: "", method: "CASH", status: "COMPLETED", note: "" });
       fetchPayments();
     } else {
-      setFormError("Check all fields.");
+      setFormError("Please check all required fields.");
     }
     setFormLoading(false);
-  };
-
-  const methodBadge = (method: string) => {
-    const map: Record<string, string> = {
-      CASH: "💵", CARD: "💳", ZELLE: "📲", PAYPAL: "🅿",
-    };
-    return map[method] ?? method;
   };
 
   const statusVariant = (status: string) => {
@@ -98,21 +104,49 @@ export default function PaymentsPage() {
     return "default";
   };
 
+  const totalAmount = payments.reduce((s, p) => s + p.amount, 0);
+  const pendingAmount = payments.filter((p) => p.status === "PENDING").reduce((s, p) => s + p.amount, 0);
+  const completedAmount = payments.filter((p) => p.status === "COMPLETED").reduce((s, p) => s + p.amount, 0);
+
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          {(["ALL", "PENDING", "COMPLETED"] as TabType[]).map((t) => (
+      {/* Summary row */}
+      {!loading && payments.length > 0 && (
+        <div className="grid grid-cols-3 gap-3">
+          <div className="bg-surface border border-border rounded-xl px-4 py-3">
+            <p className="text-xs text-text-muted uppercase tracking-wider mb-1">
+              {tab === "ALL" ? "Total" : tab.charAt(0) + tab.slice(1).toLowerCase()}
+            </p>
+            <p className="text-lg font-bold text-text-primary">{formatCurrency(totalAmount)}</p>
+            <p className="text-xs text-text-muted mt-0.5">{payments.length} records</p>
+          </div>
+          <div className="bg-warning/5 border border-warning/20 rounded-xl px-4 py-3">
+            <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Pending</p>
+            <p className="text-lg font-bold text-warning">{formatCurrency(pendingAmount)}</p>
+            <p className="text-xs text-text-muted mt-0.5">
+              {payments.filter((p) => p.status === "PENDING").length} records
+            </p>
+          </div>
+          <div className="bg-success/5 border border-success/20 rounded-xl px-4 py-3">
+            <p className="text-xs text-text-muted uppercase tracking-wider mb-1">Collected</p>
+            <p className="text-lg font-bold text-success">{formatCurrency(completedAmount)}</p>
+            <p className="text-xs text-text-muted mt-0.5">
+              {payments.filter((p) => p.status === "COMPLETED").length} records
+            </p>
+          </div>
+        </div>
+      )}
+
+      {/* Tabs + action */}
+      <div className="flex items-center justify-between gap-4 flex-wrap">
+        <div className="tab-bar">
+          {TABS.map((t) => (
             <button
-              key={t}
-              onClick={() => setTab(t)}
-              className={`text-sm px-3 py-1.5 rounded-lg border transition-all ${
-                tab === t
-                  ? "bg-accent text-white border-accent"
-                  : "text-text-muted border-border hover:border-accent/50"
-              }`}
+              key={t.value}
+              onClick={() => setTab(t.value)}
+              className={`tab-item ${tab === t.value ? "active" : ""}`}
             >
-              {t.charAt(0) + t.slice(1).toLowerCase()}
+              {t.label}
             </button>
           ))}
         </div>
@@ -122,44 +156,78 @@ export default function PaymentsPage() {
         </Button>
       </div>
 
+      {/* Table */}
       <Card>
         {loading ? (
-          <p className="text-text-muted text-sm py-8 text-center">Loading...</p>
+          <div>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 py-3 px-4 border-b border-border/50 last:border-0">
+                <div className="skeleton h-3.5 w-32" />
+                <div className="skeleton h-3.5 w-20" />
+                <div className="skeleton h-5 w-14 rounded-full" />
+                <div className="skeleton h-5 w-16 rounded-full" />
+                <div className="skeleton h-3 w-20" />
+                <div className="flex gap-2">
+                  <div className="skeleton h-6 w-6 rounded-md" />
+                  <div className="skeleton h-6 w-6 rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : payments.length === 0 ? (
+          <div className="py-16 text-center">
+            <div className="w-14 h-14 rounded-2xl bg-surface-2 border border-border flex items-center justify-center mx-auto mb-4">
+              <CreditCard size={22} className="text-text-muted" />
+            </div>
+            <p className="font-medium text-text-primary">No payments found</p>
+            <p className="text-sm text-text-muted mt-1">
+              {tab !== "ALL" ? `No ${tab.toLowerCase()} payments.` : "Record your first payment to get started."}
+            </p>
+          </div>
         ) : (
           <Table
             headers={["Student", "Amount", "Method", "Status", "Date", "Actions"]}
-            isEmpty={payments.length === 0}
-            emptyMessage="No payments found."
+            isEmpty={false}
           >
-            {payments.map((p) => (
-              <tr key={p.id} className="border-b border-border/50 hover:bg-surface-2/50 transition-colors">
-                <td className="py-3 px-4 first:pl-0 font-medium text-text-primary">
-                  {p.student.firstName} {p.student.lastName}
-                </td>
-                <td className="py-3 px-4 text-text-primary font-semibold">
-                  {formatCurrency(p.amount)}
-                </td>
-                <td className="py-3 px-4 text-text-muted text-xs">
-                  {methodBadge(p.method)} {p.method.toLowerCase()}
-                </td>
-                <td className="py-3 px-4">
-                  <Badge variant={statusVariant(p.status)}>{p.status.toLowerCase()}</Badge>
-                </td>
-                <td className="py-3 px-4 text-text-muted text-xs">{formatDate(p.createdAt)}</td>
-                <td className="py-3 px-4">
-                  <div className="flex items-center gap-2">
-                    {p.status === "PENDING" && (
-                      <Button variant="ghost" size="sm" onClick={() => handleMarkComplete(p.id)} title="Mark as completed">
-                        <CheckCircle size={13} className="text-success" />
+            {payments.map((p) => {
+              const method = METHOD_STYLES[p.method] ?? { label: p.method, cls: "bg-surface-2 text-text-muted border border-border" };
+              return (
+                <tr key={p.id} className="border-b border-border/30 hover:bg-surface-2/40 transition-colors">
+                  <td className="py-3 px-4 first:pl-0 font-medium text-text-primary">
+                    {p.student.firstName} {p.student.lastName}
+                  </td>
+                  <td className="py-3 px-4 text-text-primary font-semibold">
+                    {formatCurrency(p.amount)}
+                  </td>
+                  <td className="py-3 px-4">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium ${method.cls}`}>
+                      {method.label}
+                    </span>
+                  </td>
+                  <td className="py-3 px-4">
+                    <Badge variant={statusVariant(p.status)}>{p.status.toLowerCase()}</Badge>
+                  </td>
+                  <td className="py-3 px-4 text-text-muted text-xs">{formatDate(p.createdAt)}</td>
+                  <td className="py-3 px-4">
+                    <div className="flex items-center gap-1.5">
+                      {p.status === "PENDING" && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleMarkComplete(p.id)}
+                          title="Mark as completed"
+                        >
+                          <CheckCircle size={13} className="text-success" />
+                        </Button>
+                      )}
+                      <Button variant="ghost" size="sm" onClick={() => handleDelete(p.id)} title="Delete">
+                        <Trash2 size={13} className="text-danger" />
                       </Button>
-                    )}
-                    <Button variant="ghost" size="sm" onClick={() => handleDelete(p.id)}>
-                      <Trash2 size={13} className="text-danger" />
-                    </Button>
-                  </div>
-                </td>
-              </tr>
-            ))}
+                    </div>
+                  </td>
+                </tr>
+              );
+            })}
           </Table>
         )}
       </Card>
@@ -219,13 +287,17 @@ export default function PaymentsPage() {
             value={form.note}
             onChange={(e) => setForm((p) => ({ ...p, note: e.target.value }))}
           />
-          {formError && <p className="text-sm text-danger">{formError}</p>}
+          {formError && (
+            <p className="text-sm text-danger bg-danger/10 border border-danger/20 rounded-lg px-3 py-2">
+              {formError}
+            </p>
+          )}
           <div className="flex justify-end gap-3 pt-2">
             <Button type="button" variant="secondary" onClick={() => setShowForm(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={formLoading}>
-              {formLoading ? "Saving..." : "Save payment"}
+              {formLoading ? "Saving…" : "Save Payment"}
             </Button>
           </div>
         </form>
