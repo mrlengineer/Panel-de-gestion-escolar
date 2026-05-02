@@ -1,8 +1,0 @@
-{
-  "permissions": {
-    "allow": [
-      "Bash(Get-ChildItem -Path \"c:\\\\Users\\\\gg260\\\\Documents\\\\GitHub\\\\Panel-de-gestion-escolar\" -Force)",
-      "Bash(Select-Object Name, PSIsContainer)"
-    ]
-  }
-}

@@ -34,8 +34,6 @@ A full-stack web app for managing students, courses, enrollments, payments, and 
 
 ## Screenshots
 
-> Add screenshots to `/public/screenshots/` and update the paths below.
-
 | Dashboard | Students | Payments |
 |-----------|----------|----------|
 | ![Dashboard](public/screenshots/dashboard.png) | ![Students](public/screenshots/students.png) | ![Payments](public/screenshots/payments.png) |
@@ -180,4 +178,4 @@ prisma/
 
 ## Author
 
-Built by **[your name]** — [GitHub](https://github.com/your-username) · [Portfolio](https://your-portfolio.com)
+Built by **MrL** — [GitHub](https://github.com/mrlengineer) · [Portfolio](https://mrlengineer.github.io/MrLDev/) ft **x1yzl** — [GitHub](https://github.com/x1yzl) · [Portfolio](https://x1yzl.github.io/)
