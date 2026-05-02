@@ -9,7 +9,7 @@ import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import CourseForm from "@/components/courses/CourseForm";
 import { CourseWithTeacher } from "@/types";
-import { formatCurrency } from "@/lib/utils";
+import { formatCurrency, cn } from "@/lib/utils";
 
 export default function CoursesPage() {
   const { data: session } = useSession();
@@ -68,16 +68,33 @@ export default function CoursesPage() {
                 <Badge variant="info">{formatCurrency(course.monthlyPrice)}/mo</Badge>
               </div>
 
-              <div className="space-y-1.5 text-sm text-text-muted">
+              <div className="space-y-2 text-sm text-text-muted">
                 <p>{course.schedule}</p>
-                <div className="flex items-center gap-1.5">
-                  <Users size={13} />
-                  <span>
-                    {course._count.enrollments} / {course.maxCapacity} students
-                  </span>
-                  {course._count.enrollments >= course.maxCapacity && (
-                    <Badge variant="danger">Full</Badge>
-                  )}
+                <div className="space-y-1.5">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="flex items-center gap-1.5">
+                      <Users size={12} />
+                      {course._count.enrollments} / {course.maxCapacity} students
+                    </span>
+                    {course._count.enrollments >= course.maxCapacity && (
+                      <Badge variant="danger">Full</Badge>
+                    )}
+                  </div>
+                  <div className="h-1.5 bg-surface-2 rounded-full overflow-hidden">
+                    <div
+                      className={cn(
+                        "h-full rounded-full transition-all duration-300",
+                        (course._count.enrollments / course.maxCapacity) >= 1
+                          ? "bg-danger"
+                          : (course._count.enrollments / course.maxCapacity) >= 0.75
+                          ? "bg-warning"
+                          : "bg-success"
+                      )}
+                      style={{
+                        width: `${Math.min((course._count.enrollments / course.maxCapacity) * 100, 100)}%`,
+                      }}
+                    />
+                  </div>
                 </div>
                 <p className="text-xs">
                   Teacher: <span className="text-text-primary">{course.teacher.name}</span>

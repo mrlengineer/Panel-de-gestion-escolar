@@ -13,7 +13,7 @@ import {
   BarChart3,
   GraduationCap,
 } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { cn, getInitials } from "@/lib/utils";
 import { Role } from "@prisma/client";
 
 type NavItem = {
@@ -72,7 +72,18 @@ export default function Sidebar() {
         ))}
       </nav>
 
-      <div className="p-4 border-t border-border">
+      <div className="p-4 border-t border-border space-y-3">
+        {session?.user && (
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-full bg-accent/20 border border-accent/30 flex items-center justify-center text-xs font-semibold text-accent flex-shrink-0">
+              {getInitials(session.user.name ?? "?")}
+            </div>
+            <div className="min-w-0">
+              <p className="text-sm font-medium text-text-primary truncate">{session.user.name}</p>
+              <p className="text-xs text-text-muted capitalize">{session.user.role?.toLowerCase()}</p>
+            </div>
+          </div>
+        )}
         <p className="text-xs text-text-muted text-center">v0.1.0</p>
       </div>
     </aside>

@@ -18,7 +18,7 @@ export default function StatCard({ title, value, sub, icon, color = "accent" }: 
   };
 
   return (
-    <Card>
+    <Card className="transition-all duration-200 hover:-translate-y-0.5 hover:border-border/80 hover:shadow-lg hover:shadow-black/20 cursor-default">
       <div className="flex items-start justify-between">
         <div>
           <p className="text-xs font-medium text-text-muted uppercase tracking-wider">{title}</p>

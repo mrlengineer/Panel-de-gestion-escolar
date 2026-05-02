@@ -34,17 +34,21 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-4">
-      <div className="w-full max-w-md">
+    <div className="min-h-screen bg-background flex items-center justify-center px-4 relative overflow-hidden">
+      {/* subtle background decorations */}
+      <div className="pointer-events-none absolute top-0 left-1/4 w-96 h-96 bg-accent/10 rounded-full blur-3xl -translate-y-1/2" />
+      <div className="pointer-events-none absolute bottom-0 right-1/4 w-80 h-80 bg-success/5 rounded-full blur-3xl translate-y-1/2" />
+
+      <div className="w-full max-w-md relative">
         <div className="text-center mb-8">
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-accent rounded-xl mb-4">
+          <div className="inline-flex items-center justify-center w-12 h-12 bg-accent rounded-xl mb-4 shadow-lg shadow-accent/30">
             <GraduationCap size={24} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold text-text-primary">SchoolDesk</h1>
           <p className="text-text-muted text-sm mt-1">Sign in to your account</p>
         </div>
 
-        <div className="bg-surface border border-border rounded-xl p-8">
+        <div className="bg-surface border border-border rounded-xl p-8 shadow-xl shadow-black/30">
           <form onSubmit={handleSubmit} className="space-y-4">
             <Input
               label="Email"
@@ -89,7 +93,10 @@ export default function LoginPage() {
           </form>
 
           <div className="mt-6 pt-6 border-t border-border">
-            <p className="text-xs text-text-muted mb-3">Demo accounts:</p>
+            <p className="text-xs text-text-muted mb-3">
+              Demo accounts{" "}
+              <span className="text-text-primary font-medium">(password: admin123)</span>:
+            </p>
             <div className="space-y-1.5">
               {[
                 { role: "Admin", email: "admin@school.com" },
@@ -108,6 +115,10 @@ export default function LoginPage() {
             </div>
           </div>
         </div>
+
+        <p className="text-xs text-text-muted text-center mt-6">
+          SchoolDesk &copy; {new Date().getFullYear()}
+        </p>
       </div>
     </div>
   );

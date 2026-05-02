@@ -70,7 +70,24 @@ export default function StudentsPage() {
 
       <Card>
         {loading ? (
-          <p className="text-text-muted text-sm py-8 text-center">Loading...</p>
+          <div>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="flex items-center gap-4 py-3 px-4 border-b border-border/50 last:border-0">
+                <div className="flex-1 space-y-2">
+                  <div className="skeleton h-3.5 w-36" />
+                  <div className="skeleton h-2.5 w-24" />
+                </div>
+                <div className="skeleton h-3 w-44" />
+                <div className="skeleton h-5 w-14 rounded-full" />
+                <div className="skeleton h-3 w-20" />
+                <div className="flex items-center gap-2">
+                  <div className="skeleton h-6 w-6 rounded-md" />
+                  <div className="skeleton h-6 w-6 rounded-md" />
+                  <div className="skeleton h-6 w-6 rounded-md" />
+                </div>
+              </div>
+            ))}
+          </div>
         ) : (
           <Table
             headers={["Name", "Email", "Status", "Joined", "Actions"]}
