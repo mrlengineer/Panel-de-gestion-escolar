@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAuth, ADMIN_TEACHER } from "@/lib/rbac";
 
 const attendanceSchema = z.object({
   studentId: z.string().min(1),
@@ -10,6 +11,9 @@ const attendanceSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
+  const a = await requireAuth(...ADMIN_TEACHER);
+  if (!a.ok) return a.response;
+
   const { searchParams } = new URL(req.url);
   const courseId = searchParams.get("courseId");
   const date = searchParams.get("date");
@@ -27,6 +31,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const a = await requireAuth(...ADMIN_TEACHER);
+  if (!a.ok) return a.response;
+
   const body = await req.json();
   const parsed = attendanceSchema.safeParse(body);
 

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAuth, ADMIN_ONLY, ALL_ROLES } from "@/lib/rbac";
 
 const updateSchema = z.object({
   firstName: z.string().min(1).optional(),
@@ -16,6 +17,9 @@ export async function GET(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const a = await requireAuth(...ALL_ROLES);
+  if (!a.ok) return a.response;
+
   const { id } = await params;
   const student = await prisma.student.findUnique({
     where: { id },
@@ -37,6 +41,9 @@ export async function PATCH(
   req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const a = await requireAuth(...ADMIN_ONLY);
+  if (!a.ok) return a.response;
+
   const { id } = await params;
   const body = await req.json();
   const parsed = updateSchema.safeParse(body);
@@ -62,6 +69,9 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const a = await requireAuth(...ADMIN_ONLY);
+  if (!a.ok) return a.response;
+
   const { id } = await params;
 
   await prisma.student.delete({ where: { id } });

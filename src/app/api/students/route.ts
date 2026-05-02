@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAuth, ADMIN_ONLY, ALL_ROLES } from "@/lib/rbac";
 
 const studentSchema = z.object({
   firstName: z.string().min(1),
@@ -13,6 +14,9 @@ const studentSchema = z.object({
 });
 
 export async function GET(req: NextRequest) {
+  const a = await requireAuth(...ALL_ROLES);
+  if (!a.ok) return a.response;
+
   const { searchParams } = new URL(req.url);
   const search = searchParams.get("search") ?? "";
   const status = searchParams.get("status");
@@ -42,6 +46,9 @@ export async function GET(req: NextRequest) {
 }
 
 export async function POST(req: NextRequest) {
+  const a = await requireAuth(...ADMIN_ONLY);
+  if (!a.ok) return a.response;
+
   const body = await req.json();
   const parsed = studentSchema.safeParse(body);
 

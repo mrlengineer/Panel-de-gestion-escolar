@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 import { z } from "zod";
+import { requireAuth, ADMIN_ONLY, ALL_ROLES } from "@/lib/rbac";
 
 const courseSchema = z.object({
   name: z.string().min(1),
@@ -12,6 +13,9 @@ const courseSchema = z.object({
 });
 
 export async function GET() {
+  const a = await requireAuth(...ALL_ROLES);
+  if (!a.ok) return a.response;
+
   const courses = await prisma.course.findMany({
     include: {
       teacher: { select: { id: true, name: true, email: true } },
@@ -24,6 +28,9 @@ export async function GET() {
 }
 
 export async function POST(req: NextRequest) {
+  const a = await requireAuth(...ADMIN_ONLY);
+  if (!a.ok) return a.response;
+
   const body = await req.json();
   const parsed = courseSchema.safeParse(body);
 
