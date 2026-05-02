@@ -1,0 +1,137 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  ADMIN
+  TEACHER
+  FINANCE
+}
+
+enum StudentStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum EnrollmentStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
+enum PaymentMethod {
+  CASH
+  CARD
+  ZELLE
+  PAYPAL
+}
+
+enum PaymentStatus {
+  PENDING
+  COMPLETED
+  REFUNDED
+}
+
+enum AttendanceStatus {
+  PRESENT
+  ABSENT
+  LATE
+}
+
+model User {
+  id        String   @id @default(cuid())
+  name      String
+  email     String   @unique
+  password  String
+  role      Role     @default(TEACHER)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  courses Course[]
+}
+
+model Student {
+  id          String        @id @default(cuid())
+  firstName   String
+  lastName    String
+  email       String        @unique
+  phone       String?
+  address     String?
+  birthDate   DateTime?
+  status      StudentStatus @default(ACTIVE)
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+
+  enrollments Enrollment[]
+  payments    Payment[]
+  attendance  Attendance[]
+}
+
+model Course {
+  id           String   @id @default(cuid())
+  name         String
+  description  String?
+  monthlyPrice Float
+  schedule     String
+  maxCapacity  Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+
+  teacherId String
+  teacher   User   @relation(fields: [teacherId], references: [id])
+
+  enrollments Enrollment[]
+  attendance  Attendance[]
+}
+
+model Enrollment {
+  id         String           @id @default(cuid())
+  status     EnrollmentStatus @default(PENDING)
+  enrolledAt DateTime         @default(now())
+  updatedAt  DateTime         @updatedAt
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId])
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  amount    Float
+  method    PaymentMethod
+  status    PaymentStatus @default(PENDING)
+  note      String?
+  paidAt    DateTime?
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+}
+
+model Attendance {
+  id        String           @id @default(cuid())
+  date      DateTime
+  status    AttendanceStatus
+  createdAt DateTime         @default(now())
+
+  studentId String
+  student   Student @relation(fields: [studentId], references: [id], onDelete: Cascade)
+
+  courseId String
+  course   Course @relation(fields: [courseId], references: [id], onDelete: Cascade)
+
+  @@unique([studentId, courseId, date])
+}
