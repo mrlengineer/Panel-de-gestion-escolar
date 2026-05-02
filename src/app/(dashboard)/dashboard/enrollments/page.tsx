@@ -9,6 +9,7 @@ import Badge from "@/components/ui/Badge";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import Select from "@/components/ui/Select";
+import SearchInput from "@/components/ui/SearchInput";
 import { EnrollmentWithDetails } from "@/types";
 import { formatDate } from "@/lib/utils";
 
@@ -30,6 +31,7 @@ export default function EnrollmentsPage() {
   const [enrollments, setEnrollments] = useState<EnrollmentWithDetails[]>([]);
   const [loading, setLoading] = useState(true);
   const [statusFilter, setStatusFilter] = useState<StatusFilter>("");
+  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
 
   const [students, setStudents] = useState<Student[]>([]);
@@ -99,9 +101,18 @@ export default function EnrollmentsPage() {
     return "danger";
   };
 
+  const q = search.toLowerCase();
+  const filtered = search
+    ? enrollments.filter(
+        (e) =>
+          `${e.student.firstName} ${e.student.lastName}`.toLowerCase().includes(q) ||
+          e.course.name.toLowerCase().includes(q)
+      )
+    : enrollments;
+
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      <div className="flex items-center gap-3 flex-wrap">
         {/* Filter tabs */}
         <div className="tab-bar">
           {TABS.map((t) => (
@@ -114,12 +125,19 @@ export default function EnrollmentsPage() {
             </button>
           ))}
         </div>
-
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Search by student or course…"
+          className="w-56"
+        />
         {canWrite && (
-          <Button onClick={() => setShowForm(true)}>
-            <Plus size={15} />
-            Enroll Student
-          </Button>
+          <div className="ml-auto">
+            <Button onClick={() => setShowForm(true)}>
+              <Plus size={15} />
+              Enroll Student
+            </Button>
+          </div>
         )}
       </div>
 
@@ -149,13 +167,16 @@ export default function EnrollmentsPage() {
         ) : (
           <>
             <p className="text-xs text-text-muted mb-3">
-              <span className="font-semibold text-text-primary">{enrollments.length}</span> enrollment{enrollments.length !== 1 ? "s" : ""}
+              <span className="font-semibold text-text-primary">{filtered.length}</span> enrollment{filtered.length !== 1 ? "s" : ""}
+              {search && ` for “${search}”`}
             </p>
             <Table
               headers={["Student", "Course", "Status", "Enrolled", "Actions"]}
               isEmpty={false}
             >
-              {enrollments.map((e) => (
+              {filtered.length === 0 ? (
+                <tr><td colSpan={5} className="py-10 text-center text-sm text-text-muted">No results for &ldquo;{search}&rdquo;</td></tr>
+              ) : filtered.map((e) => (
                 <tr key={e.id} className="border-b border-border/30 hover:bg-surface-2/40 transition-colors">
                   <td className="py-3 px-4 first:pl-0 text-text-primary font-medium">
                     {e.student.firstName} {e.student.lastName}

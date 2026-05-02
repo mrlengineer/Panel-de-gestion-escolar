@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { Plus, Search, Eye, Pencil, Trash2, Users } from "lucide-react";
+import { Plus, Eye, Pencil, Trash2, Users } from "lucide-react";
 import { useSession } from "next-auth/react";
 import Card from "@/components/ui/Card";
 import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
+import SearchInput from "@/components/ui/SearchInput";
 import StudentForm from "@/components/students/StudentForm";
 import { Student } from "@/types";
 import { formatDate } from "@/lib/utils";
@@ -50,16 +51,12 @@ export default function StudentsPage() {
   return (
     <div className="space-y-5">
       <div className="flex items-center justify-between gap-4">
-        <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-muted" />
-          <input
-            type="text"
-            placeholder="Search by name or email…"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="bg-surface-2 border border-border rounded-lg pl-8 pr-4 py-2 text-sm text-text-primary placeholder:text-text-muted focus:outline-none focus:ring-2 focus:ring-accent/30 focus:border-accent/60 w-64 transition-all"
-          />
-        </div>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Search by name or email…"
+          className="w-64"
+        />
         {isAdmin && (
           <Button onClick={() => setShowForm(true)}>
             <Plus size={15} />

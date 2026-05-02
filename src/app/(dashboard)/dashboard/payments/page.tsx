@@ -9,6 +9,7 @@ import Table from "@/components/ui/Table";
 import Modal from "@/components/ui/Modal";
 import Input from "@/components/ui/Input";
 import Select from "@/components/ui/Select";
+import SearchInput from "@/components/ui/SearchInput";
 import { PaymentWithStudent } from "@/types";
 import { formatCurrency, formatDate } from "@/lib/utils";
 
@@ -33,6 +34,7 @@ export default function PaymentsPage() {
   const [payments, setPayments] = useState<PaymentWithStudent[]>([]);
   const [loading, setLoading] = useState(true);
   const [tab, setTab] = useState<TabType>("ALL");
+  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [students, setStudents] = useState<Student[]>([]);
 
@@ -104,6 +106,16 @@ export default function PaymentsPage() {
     return "default";
   };
 
+  const q = search.toLowerCase();
+  const filtered = search
+    ? payments.filter(
+        (p) =>
+          `${p.student.firstName} ${p.student.lastName}`.toLowerCase().includes(q) ||
+          p.method.toLowerCase().includes(q) ||
+          p.amount.toString().includes(q)
+      )
+    : payments;
+
   const totalAmount = payments.reduce((s, p) => s + p.amount, 0);
   const pendingAmount = payments.filter((p) => p.status === "PENDING").reduce((s, p) => s + p.amount, 0);
   const completedAmount = payments.filter((p) => p.status === "COMPLETED").reduce((s, p) => s + p.amount, 0);
@@ -137,8 +149,8 @@ export default function PaymentsPage() {
         </div>
       )}
 
-      {/* Tabs + action */}
-      <div className="flex items-center justify-between gap-4 flex-wrap">
+      {/* Tabs + search + action */}
+      <div className="flex items-center gap-3 flex-wrap">
         <div className="tab-bar">
           {TABS.map((t) => (
             <button
@@ -150,10 +162,18 @@ export default function PaymentsPage() {
             </button>
           ))}
         </div>
-        <Button onClick={() => setShowForm(true)}>
-          <Plus size={15} />
-          Record Payment
-        </Button>
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Search by student, method…"
+          className="w-56"
+        />
+        <div className="ml-auto">
+          <Button onClick={() => setShowForm(true)}>
+            <Plus size={15} />
+            Record Payment
+          </Button>
+        </div>
       </div>
 
       {/* Table */}
@@ -184,12 +204,23 @@ export default function PaymentsPage() {
               {tab !== "ALL" ? `No ${tab.toLowerCase()} payments.` : "Record your first payment to get started."}
             </p>
           </div>
+        ) : filtered.length === 0 ? (
+          <div className="py-14 text-center">
+            <p className="text-sm font-medium text-text-primary">No results for &ldquo;{search}&rdquo;</p>
+            <p className="text-xs text-text-muted mt-1">Try a different student name or method.</p>
+          </div>
         ) : (
+          <>
+            {search && (
+              <p className="text-xs text-text-muted mb-3">
+                <span className="font-semibold text-text-primary">{filtered.length}</span> result{filtered.length !== 1 ? "s" : ""}
+              </p>
+            )}
           <Table
             headers={["Student", "Amount", "Method", "Status", "Date", "Actions"]}
             isEmpty={false}
           >
-            {payments.map((p) => {
+            {filtered.map((p) => {
               const method = METHOD_STYLES[p.method] ?? { label: p.method, cls: "bg-surface-2 text-text-muted border border-border" };
               return (
                 <tr key={p.id} className="border-b border-border/30 hover:bg-surface-2/40 transition-colors">
@@ -229,6 +260,7 @@ export default function PaymentsPage() {
               );
             })}
           </Table>
+          </>
         )}
       </Card>
 

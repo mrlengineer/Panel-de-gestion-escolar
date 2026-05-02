@@ -13,7 +13,8 @@ import {
 import Card from "@/components/ui/Card";
 import Badge from "@/components/ui/Badge";
 import { formatCurrency, getInitials } from "@/lib/utils";
-import { TrendingUp, BookOpen, AlertCircle } from "lucide-react";
+import { TrendingUp, BookOpen, AlertCircle, Search } from "lucide-react";
+import SearchInput from "@/components/ui/SearchInput";
 
 interface RevenuePoint {
   month: string;
@@ -43,6 +44,7 @@ export default function ReportsPage() {
     topCourses: TopCourse[];
   } | null>(null);
   const [loading, setLoading] = useState(true);
+  const [debtSearch, setDebtSearch] = useState("");
 
   useEffect(() => {
     fetch("/api/reports")
@@ -92,6 +94,15 @@ export default function ReportsPage() {
   if (!data) return null;
 
   const totalRevenue = data.revenueByMonth.reduce((s, r) => s + r.revenue, 0);
+
+  const dq = debtSearch.toLowerCase();
+  const filteredDebt = debtSearch
+    ? data.studentsWithDebt.filter(
+        (s) =>
+          `${s.firstName} ${s.lastName}`.toLowerCase().includes(dq) ||
+          s.email.toLowerCase().includes(dq)
+      )
+    : data.studentsWithDebt;
 
   return (
     <div className="space-y-5">
@@ -191,9 +202,22 @@ export default function ReportsPage() {
 
       {/* Students with pending balance */}
       <Card>
-        <div className="flex items-center gap-2 mb-5">
-          <AlertCircle size={14} className="text-warning" />
-          <h2 className="text-sm font-semibold text-text-primary">Students with Pending Balance</h2>
+        <div className="flex items-center justify-between gap-4 mb-5 flex-wrap">
+          <div className="flex items-center gap-2">
+            <AlertCircle size={14} className="text-warning" />
+            <h2 className="text-sm font-semibold text-text-primary">Students with Pending Balance</h2>
+            {data.studentsWithDebt.length > 0 && (
+              <span className="text-xs text-text-muted">({data.studentsWithDebt.length})</span>
+            )}
+          </div>
+          {data.studentsWithDebt.length > 0 && (
+            <SearchInput
+              value={debtSearch}
+              onChange={setDebtSearch}
+              placeholder="Search by name or email…"
+              className="w-56"
+            />
+          )}
         </div>
         {data.studentsWithDebt.length === 0 ? (
           <div className="py-10 text-center">
@@ -202,7 +226,9 @@ export default function ReportsPage() {
           </div>
         ) : (
           <div className="space-y-0">
-            {data.studentsWithDebt.map((s) => {
+            {filteredDebt.length === 0 ? (
+              <p className="text-sm text-text-muted py-6 text-center">No results for &ldquo;{debtSearch}&rdquo;</p>
+            ) : filteredDebt.map((s) => {
               const total = s.payments.reduce((sum, p) => sum + p.amount, 0);
               return (
                 <div

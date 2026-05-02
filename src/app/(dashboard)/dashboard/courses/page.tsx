@@ -8,6 +8,7 @@ import Button from "@/components/ui/Button";
 import Badge from "@/components/ui/Badge";
 import Modal from "@/components/ui/Modal";
 import CourseForm from "@/components/courses/CourseForm";
+import SearchInput from "@/components/ui/SearchInput";
 import { CourseWithTeacher } from "@/types";
 import { formatCurrency, cn } from "@/lib/utils";
 
@@ -16,6 +17,7 @@ export default function CoursesPage() {
   const isAdmin = session?.user?.role === "ADMIN";
   const [courses, setCourses] = useState<CourseWithTeacher[]>([]);
   const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
   const [showForm, setShowForm] = useState(false);
   const [editTarget, setEditTarget] = useState<CourseWithTeacher | null>(null);
 
@@ -41,12 +43,33 @@ export default function CoursesPage() {
     fetchCourses();
   };
 
+  const q = search.toLowerCase();
+  const filtered = search
+    ? courses.filter(
+        (c) =>
+          c.name.toLowerCase().includes(q) ||
+          (c.description ?? "").toLowerCase().includes(q) ||
+          c.teacher.name.toLowerCase().includes(q) ||
+          c.schedule.toLowerCase().includes(q)
+      )
+    : courses;
+
   return (
     <div className="space-y-5">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center gap-3 flex-wrap">
+        <SearchInput
+          value={search}
+          onChange={setSearch}
+          placeholder="Search by name, teacher…"
+          className="w-64"
+        />
         {!loading && courses.length > 0 && (
           <p className="text-xs text-text-muted">
-            <span className="font-semibold text-text-primary">{courses.length}</span> course{courses.length !== 1 ? "s" : ""}
+            <span className="font-semibold text-text-primary">
+              {search ? filtered.length : courses.length}
+            </span>{" "}
+            course{(search ? filtered.length : courses.length) !== 1 ? "s" : ""}
+            {search && ` for “${search}”`}
           </p>
         )}
         <div className="ml-auto">
@@ -88,9 +111,16 @@ export default function CoursesPage() {
             <p className="text-sm text-text-muted mt-1">Add your first course to get started.</p>
           </div>
         </Card>
+      ) : filtered.length === 0 ? (
+        <Card>
+          <div className="py-14 text-center">
+            <p className="text-sm font-medium text-text-primary">No results for &ldquo;{search}&rdquo;</p>
+            <p className="text-xs text-text-muted mt-1">Try a different name or teacher.</p>
+          </div>
+        </Card>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">
-          {courses.map((course) => {
+          {filtered.map((course) => {
             const pct = (course._count.enrollments / course.maxCapacity) * 100;
             const isFull = pct >= 100;
 
