@@ -52,7 +52,7 @@ A full-stack web app for managing students, courses, enrollments, payments, and 
 ### Installation
 
 ```bash
-git clone https://github.com/your-username/Panel-de-gestion-escolar.git
+git clone https://github.com/mrlengineer/Panel-de-gestion-escolar.git
 cd Panel-de-gestion-escolar
 npm install
 ```
