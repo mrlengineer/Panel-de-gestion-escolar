@@ -13,6 +13,7 @@ import {
   BarChart3,
   GraduationCap,
   LogOut,
+  ShieldCheck,
 } from "lucide-react";
 import { cn, getInitials } from "@/lib/utils";
 import { Role } from "@prisma/client";
@@ -32,6 +33,7 @@ const navItems: NavItem[] = [
   { href: "/dashboard/payments",    label: "Payments",    icon: CreditCard,    roles: ["ADMIN", "FINANCE"] },
   { href: "/dashboard/attendance",  label: "Attendance",  icon: CalendarCheck, roles: ["ADMIN", "TEACHER"] },
   { href: "/dashboard/reports",     label: "Reports",     icon: BarChart3,     roles: ["ADMIN", "FINANCE"] },
+  { href: "/dashboard/users",       label: "Accounts",    icon: ShieldCheck,   roles: ["ADMIN"] },
 ];
 
 export default function Sidebar() {

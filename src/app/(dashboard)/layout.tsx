@@ -13,6 +13,7 @@ const pageMeta: Record<string, { title: string; subtitle: string }> = {
   "/dashboard/payments":    { title: "Payments",     subtitle: "Manage fees and payment records" },
   "/dashboard/attendance":  { title: "Attendance",   subtitle: "Track daily student attendance" },
   "/dashboard/reports":     { title: "Reports",      subtitle: "Analytics and performance reports" },
+  "/dashboard/users":       { title: "Accounts",     subtitle: "Manage staff accounts and permissions" },
 };
 
 function getMeta(pathname: string) {
